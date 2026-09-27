@@ -19,21 +19,23 @@ jobs:
           fetch-depth: 0
 
       - name: Clone source
-        run: |
-          git clone --depth 1 https://github.com/MDX-Tom/gpt-instruct.git /tmp/gpt-instruct
+        run: git clone --depth 1 https://github.com/MDX-Tom/gpt-instruct.git /tmp/gpt-instruct
 
-      - name: Replace destination working tree
+      - name: Replace destination except workflows
         run: |
-          rsync -a --delete --exclude='.git/' /tmp/gpt-instruct/ ./
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/workflows/' \
+            /tmp/gpt-instruct/ ./
           git status --short
 
-      - name: Commit exact source working tree
+      - name: Commit source working tree
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
-            echo "Destination already matches source."
+            echo "Destination already matches source outside workflows."
             exit 0
           fi
           git commit -m "Replicate MDX-Tom/gpt-instruct main [replicate]"
